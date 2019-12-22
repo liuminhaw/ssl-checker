@@ -1,0 +1,6 @@
+{
+    "method": "Mail sending method",
+    "sendgrid": {
+        "key": "SendGrid API Key"
+    }
+}

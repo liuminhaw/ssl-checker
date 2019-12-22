@@ -2,7 +2,8 @@
 
 
 import datetime
-import ssl_check
+
+from checker_pkg import ssl_check
 
 if __name__ == '__main__':
     filename = 'sites.txt'
