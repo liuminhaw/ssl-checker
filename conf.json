@@ -1,6 +1,8 @@
 {
     "method": "Mail sending method",
     "sendgrid": {
-        "key": "SendGrid API Key"
+        "key": "SendGrid API Key",
+        "sender": "General sender",
+        "recipient": "General recipient"
     }
 }

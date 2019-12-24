@@ -35,9 +35,9 @@ function Installation() {
     cp requirements.txt ${DESTDIR}
     checkCode 11 "Copy requirements.txt failed." &> /dev/null    
 
-    if [[ ! -f ${DESTDIR}/sites.txt ]]; then
-        cp sites.txt ${DESTDIR}
-        checkCode 11 "Copy sites.txt failed." &> /dev/null    
+    if [[ ! -f ${DESTDIR}/sites.json ]]; then
+        cp sites.json ${DESTDIR}
+        checkCode 11 "Copy sites.json failed." &> /dev/null    
     fi
 
     if [[ ! -f ${DESTDIR}/conf.json ]]; then

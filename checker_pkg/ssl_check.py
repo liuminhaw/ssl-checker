@@ -12,17 +12,24 @@ from collections import namedtuple
 
 HostInfo = namedtuple(field_names='cert hostname peername', typename='HostInfo')
 
-HOSTS = [
-    ('25sprout.25demo.com', 443),
-    ('expired.badssl.com', 443),
-    ('www.yuanyu.tw', 443)
-]
 
-def verify_cert(cert, hostname):
-    # verify notAfter/notBefore, CA trusted, servername/sni/hostname
-    cert.has_expired()
-    # service_identity.pyopenssl.verify_hostname(client_ssl, hostname)
-    # issuer
+def get_issuer(cert):
+    try:
+        names = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)
+        if len(names) == 0:
+            return 'Empty value'
+        return names[0].value
+    except x509.ExtensionNotFound:
+        return None
+
+
+def get_alt_names(cert):
+    try:
+        ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+        return ext.value.get_values_for_type(x509.DNSName)
+    except x509.ExtensionNotFound:
+        return None
+
 
 def get_certificate(hostname, port):
     hostname_idna = idna.encode(hostname)
@@ -45,47 +52,6 @@ def get_certificate(hostname, port):
 
     return HostInfo(cert=crypto_cert, peername=peername, hostname=hostname)
 
-# def get_alt_names(cert):
-#     try:
-#         ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
-#         return ext.value.get_values_for_type(x509.DNSName)
-#     except x509.ExtensionNotFound:
-#         return None
-
-# def get_common_name(cert):
-#     try:
-#         names = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
-#         return names[0].value
-#     except x509.ExtensionNotFound:
-#         return None
-
-# def get_issuer(cert):
-#     try:
-#         names = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)
-#         if len(names) == 0:
-#             return 'Empty value'
-#         return names[0].value
-#     except x509.ExtensionNotFound:
-#         return None
-
-
-# def print_basic_info(hostinfo):
-#     s = '''» {hostname} « … {peername}
-#     \tcommonName: {commonname}
-#     \tSAN: {SAN}
-#     \tissuer: {issuer}
-#     \tnotBefore: {notbefore}
-#     \tnotAfter:  {notafter}
-#     '''.format(
-#             hostname=hostinfo.hostname,
-#             peername=hostinfo.peername,
-#             commonname=get_common_name(hostinfo.cert),
-#             SAN=get_alt_names(hostinfo.cert),
-#             issuer=get_issuer(hostinfo.cert),
-#             notbefore=hostinfo.cert.not_valid_before,
-#             notafter=hostinfo.cert.not_valid_after
-#     )
-#     print(s)
 
 def check_it_out(hostname, port):
     hostinfo = get_certificate(hostname, port)
@@ -93,9 +59,3 @@ def check_it_out(hostname, port):
     # print(type(hostinfo.cert.not_valid_after))
     # print_basic_info(hostinfo)
 
-
-import concurrent.futures
-if __name__ == '__main__':
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as e:
-        for hostinfo in e.map(lambda x: get_certificate(x[0], x[1]), HOSTS):
-            print_basic_info(hostinfo)

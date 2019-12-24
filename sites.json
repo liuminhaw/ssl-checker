@@ -1,0 +1,12 @@
+{
+    "site-name": {
+        "site-url": "website url",
+        "alert-days": ["30", "7", "3"],
+        "sender": "sender only for this url (optional)",
+        "recipient": "recipient only for this url (optional)"
+    },
+    "site-name-2": {
+        "site-url": "website url",
+        "alert-days": ["15", "7", "1"]
+    }
+}
