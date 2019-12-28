@@ -1,10 +1,13 @@
 # -*- encoding: utf-8 -*-
 
 
+import sys
 import datetime, json
 import requests
 
+from checker_pkg import checker_conf
 from checker_pkg import ssl_check
+from checker_pkg import mailer_sendgrid
 
 # matched_sites structure
 # {'days': ['site-url1', 'site-url2'], ...}
@@ -13,7 +16,7 @@ matched_sites = {}
 
 def check_matching(days_left, site_data):
     """
-    Param:
+    Params:
         days_left - number of days left before expiration
         site_data - single site object json from sites.json 
     """
@@ -29,9 +32,15 @@ def check_matching(days_left, site_data):
 
 
 if __name__ == '__main__':
+    CONFIG = 'conf.json'
     FILENAME = 'sites.json'
 
-    # TODO: Test global config
+    # TODO: Test global config (config.json)
+    try:
+        mail_info = checker_conf.Config(CONFIG)
+    except checker_conf.configError as err:
+        print(err)
+        sys.exit(1)
 
     with open(FILENAME) as json_file:
         sites_data = json.load(json_file)
@@ -60,5 +69,17 @@ if __name__ == '__main__':
             # Check alert days matching
             check_matching(delta_time.days, sites_data[site_name])
 
-            print(matched_sites)
+    # Sending mail
+    if bool(matched_sites):
+        new_mail = mailer_sendgrid.Sender(
+            mail_info.api_key, 
+            mail_info.sender, 
+            mail_info.recipient, 
+            mail_info.subject)
+
+        new_mail.construct_content(matched_sites)
+        new_mail.send_mail()
+
+            # Just for debugging
+            # print(matched_sites)
 

@@ -16,11 +16,11 @@ HostInfo = namedtuple(field_names='cert hostname peername', typename='HostInfo')
 def get_issuer(cert):
     try:
         names = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)
-        if len(names) == 0:
-            return 'Empty value'
         return names[0].value
     except x509.ExtensionNotFound:
         return None
+    except:
+        return 'Failed to get issuer'
 
 
 def get_alt_names(cert):

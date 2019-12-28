@@ -3,6 +3,7 @@
     "sendgrid": {
         "key": "SendGrid API Key",
         "sender": "General sender",
-        "recipient": "General recipient"
+        "recipient": "General recipient",
+        "subject": "Mail subject"
     }
 }
