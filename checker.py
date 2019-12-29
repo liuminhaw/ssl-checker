@@ -33,41 +33,53 @@ def check_matching(days_left, site_data):
 
 if __name__ == '__main__':
     CONFIG = 'conf.json'
-    FILENAME = 'sites.json'
+    SITES_CONFIG = 'sites.json'
 
-    # TODO: Test global config (config.json)
+    # TODO: Check CONFIG file existence
+
+    # TODO: Check SITES_CONFIG file existence
+
+    # Test global config - conf.json
     try:
         mail_info = checker_conf.Config(CONFIG)
     except checker_conf.configError as err:
         print(err)
         sys.exit(1)
 
-    with open(FILENAME) as json_file:
-        sites_data = json.load(json_file)
-        for site_name in sites_data:
-            # TODO: Test site config
+    # Test config - sites.json
+    sites_info = checker_conf.SitesConfig(SITES_CONFIG)
+    try:
+        sites_info.validation()
+    except checker_conf.configError as err:
+        print(err)
+        sys.exit(1)
 
-            # Test https
-            url = sites_data[site_name]['site-url']
-            try:
-                requests.get('https://{}'.format(url), verify=True)
-            except requests.exceptions.SSLError:
-                print('Site {} no https support'.format(url))
-                print('')
-                continue
 
-            # Check ssl certificate expiration date
-            host_info = ssl_check.check_it_out(url, 443)
-            recent_time = datetime.datetime.now()
-            delta_time = host_info.cert.not_valid_after - recent_time
-            print('Site URL: {}'.format(url))
-            print('Alt name: {}'.format(ssl_check.get_alt_names(host_info.cert)))
-            print('Issuer: {}'.format(ssl_check.get_issuer(host_info.cert)))
-            print('{} day(s) left'.format(delta_time.days))
+    # with open(FILENAME) as json_file:
+        # sites_data = json.load(json_file)
+    for site_name in sites_info.configs:
+
+        # Test https
+        url = sites_info.configs[site_name]['site-url']
+        try:
+            requests.get('https://{}'.format(url), verify=True)
+        except requests.exceptions.SSLError:
+            print('Site {} no https support'.format(url))
             print('')
+            continue
 
-            # Check alert days matching
-            check_matching(delta_time.days, sites_data[site_name])
+        # Check ssl certificate expiration date
+        host_info = ssl_check.check_it_out(url, 443)
+        recent_time = datetime.datetime.now()
+        delta_time = host_info.cert.not_valid_after - recent_time
+        print('Site URL: {}'.format(url))
+        print('Alt name: {}'.format(ssl_check.get_alt_names(host_info.cert)))
+        print('Issuer: {}'.format(ssl_check.get_issuer(host_info.cert)))
+        print('{} day(s) left'.format(delta_time.days))
+        print('')
+
+        # Check alert days matching
+        check_matching(delta_time.days, sites_info.configs[site_name])
 
     # Sending mail
     if bool(matched_sites):
@@ -80,6 +92,4 @@ if __name__ == '__main__':
         new_mail.construct_content(matched_sites)
         new_mail.send_mail()
 
-            # Just for debugging
-            # print(matched_sites)
 
