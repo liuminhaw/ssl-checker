@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 
-import sys
+import sys, os
 import datetime, json
 import requests
 
@@ -35,16 +35,20 @@ if __name__ == '__main__':
     CONFIG = 'conf.json'
     SITES_CONFIG = 'sites.json'
 
-    # TODO: Check CONFIG file existence
-
-    # TODO: Check SITES_CONFIG file existence
+    # Check for config file existence
+    if not os.path.isfile(CONFIG):
+        print('{} file not exist.'.format(CONFIG))
+        sys.exit(1)
+    if not os.path.isfile(SITES_CONFIG):
+        print('{} file not exists.'.format(SITES_CONFIG))
+        sys.exit(1)
 
     # Test global config - conf.json
     try:
         mail_info = checker_conf.Config(CONFIG)
     except checker_conf.configError as err:
         print(err)
-        sys.exit(1)
+        sys.exit(2)
 
     # Test config - sites.json
     sites_info = checker_conf.SitesConfig(SITES_CONFIG)
@@ -52,7 +56,7 @@ if __name__ == '__main__':
         sites_info.validation()
     except checker_conf.configError as err:
         print(err)
-        sys.exit(1)
+        sys.exit(2)
 
 
     # with open(FILENAME) as json_file:
