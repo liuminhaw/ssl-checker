@@ -10,13 +10,24 @@ from checker_pkg import ssl_check
 from checker_pkg import mailer_sendgrid
 
 # matched_sites structure
-# {'days': ['site-url1', 'site-url2'], ...}
+# {
+#     'recipient1': {
+#         'x-days': ['site-url1', 'site-url2', ...], 
+#         'y-days': ['site-url1', 'site-url2', ...],
+#         ...
+#     },
+#     'recipient2': {
+#         'x-days': ['site-url1', 'site-url2', ...],
+#         ...
+#     },
+#     ...
+# }
 matched_sites = {}
 
-
-def check_matching(days_left, site_data):
+def check_matching(recipient, days_left, site_data):
     """
     Params:
+        recipient - mail receiver
         days_left - number of days left before expiration
         site_data - single site object json from sites.json 
     """
@@ -26,9 +37,11 @@ def check_matching(days_left, site_data):
 
     for days in config_days:
         if days_left == int(days):
-            if days not in matched_sites:
-                matched_sites[days] = []
-            matched_sites[days].append(url)
+            if recipient not in matched_sites:
+                matched_sites[recipient] = {}
+            if days not in matched_sites[recipient]:
+                matched_sites[recipient][days] = []
+            matched_sites[recipient][days].append(url)
 
 
 if __name__ == '__main__':
@@ -82,18 +95,25 @@ if __name__ == '__main__':
         print('{} day(s) left'.format(delta_time.days))
         print('')
 
+        # Check custom recipient
+        try:
+            recipient = sites_info.configs[site_name]['recipient']
+        except KeyError:
+            recipient = mail_info.recipient
+
         # Check alert days matching
-        check_matching(delta_time.days, sites_info.configs[site_name])
+        check_matching(recipient, delta_time.days, sites_info.configs[site_name])
 
     # Sending mail
     if bool(matched_sites):
-        new_mail = mailer_sendgrid.Sender(
-            mail_info.api_key, 
-            mail_info.sender, 
-            mail_info.recipient, 
-            mail_info.subject)
+        for address, matches in matched_sites.items():
+            new_mail = mailer_sendgrid.Sender(
+                mail_info.api_key, 
+                mail_info.sender, 
+                address, 
+                mail_info.subject)
 
-        new_mail.construct_content(matched_sites)
-        new_mail.send_mail()
+            new_mail.construct_content(matches)
+            new_mail.send_mail()
 
 
