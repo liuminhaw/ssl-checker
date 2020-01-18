@@ -67,7 +67,7 @@ if __name__ == '__main__':
         mail_info = checker_conf.Config(CONFIG)
     except checker_conf.configError as err:
         logger.warning(err)
-        sys.exit(2)
+        sys.exit(11)
 
     # Test config - sites.json
     sites_info = checker_conf.SitesConfig(SITES_CONFIG)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         sites_info.validation()
     except checker_conf.configError as err:
         logger.warning(err)
-        sys.exit(2)
+        sys.exit(11)
 
 
     # with open(FILENAME) as json_file:
