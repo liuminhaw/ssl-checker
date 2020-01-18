@@ -44,10 +44,18 @@ class Sender:
 
         try:
             sg = SendGridAPIClient(self.api_key)
-            response = sg.send(message)
-            print(response.status_code)
-            print(response.body)
-            print(response.headers)
+            sg.send(message)
+            #response = sg.send(message)
+            #print(response.status_code)
+            #print(response.body)
+            #print(response.headers)
         except Exception as e:
-            print(str(e))
+            raise mailError(e)
 
+
+# Exceptions
+class mailError(Exception):
+    """
+    Mailing exception
+    """
+    pass

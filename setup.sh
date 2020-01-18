@@ -47,6 +47,8 @@ function Installation() {
 
     cp -r checker_pkg ${DESTDIR}
     checkCode 11 "Copy checker_pkg directory failed." &> /dev/null    
+    cp -r module_pkg ${DESTDIR}
+    checkCode 11 "Copy module_pkg directory failed." &> /dev/null    
     cp checker.py ${DESTDIR}
     checkCode 11 "Copy checker.py failed." &> /dev/null    
     chmod 755 ${DESTDIR}/checker.py

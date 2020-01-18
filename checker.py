@@ -8,6 +8,12 @@ import requests
 from checker_pkg import checker_conf
 from checker_pkg import ssl_check
 from checker_pkg import mailer_sendgrid
+from module_pkg import logging_class as logcl
+
+
+LOG_DIR = os.path.join(os.getcwd(), 'logs')
+
+logger = logcl.PersonalLog('checker', LOG_DIR)
 
 # matched_sites structure
 # {
@@ -31,7 +37,7 @@ def check_matching(recipient, days_left, site_data):
         days_left - number of days left before expiration
         site_data - single site object json from sites.json 
     """
-    print(site_data)
+    # print(site_data)
     config_days = site_data['alert-days']
     url = site_data['site-url']
 
@@ -50,17 +56,17 @@ if __name__ == '__main__':
 
     # Check for config file existence
     if not os.path.isfile(CONFIG):
-        print('{} file not exist.'.format(CONFIG))
+        print('[INFO] {} file not exist.'.format(CONFIG))
         sys.exit(1)
     if not os.path.isfile(SITES_CONFIG):
-        print('{} file not exists.'.format(SITES_CONFIG))
+        print('[INFO] {} file not exists.'.format(SITES_CONFIG))
         sys.exit(1)
 
     # Test global config - conf.json
     try:
         mail_info = checker_conf.Config(CONFIG)
     except checker_conf.configError as err:
-        print(err)
+        logger.warning(err)
         sys.exit(2)
 
     # Test config - sites.json
@@ -68,7 +74,7 @@ if __name__ == '__main__':
     try:
         sites_info.validation()
     except checker_conf.configError as err:
-        print(err)
+        logger.warning(err)
         sys.exit(2)
 
 
@@ -81,7 +87,7 @@ if __name__ == '__main__':
         try:
             requests.get('https://{}'.format(url), verify=True)
         except requests.exceptions.SSLError:
-            print('Site {} no https support'.format(url))
+            logger.info('Site {} no https support'.format(url))
             print('')
             continue
 
@@ -89,11 +95,11 @@ if __name__ == '__main__':
         host_info = ssl_check.check_it_out(url, 443)
         recent_time = datetime.datetime.now()
         delta_time = host_info.cert.not_valid_after - recent_time
-        print('Site URL: {}'.format(url))
-        print('Alt name: {}'.format(ssl_check.get_alt_names(host_info.cert)))
-        print('Issuer: {}'.format(ssl_check.get_issuer(host_info.cert)))
-        print('{} day(s) left'.format(delta_time.days))
-        print('')
+        info_str = '\nSite URL: {}\n'.format(url)
+        info_str += 'Alt name: {}\n'.format(ssl_check.get_alt_names(host_info.cert))
+        info_str += 'Issuer: {}\n'.format(ssl_check.get_issuer(host_info.cert))
+        info_str += '{} day(s) left\n'.format(delta_time.days)
+        logger.info(info_str)
 
         # Check custom recipient
         try:
@@ -114,6 +120,12 @@ if __name__ == '__main__':
                 mail_info.subject)
 
             new_mail.construct_content(matches)
-            new_mail.send_mail()
+            try:
+                new_mail.send_mail()
+                logger.warning('Send mail to {} successed'.format(address))
+            except mailer_sendgrid.mailError as err:
+                logger.warning('Failed to send mail: {}'.format(err))
+
+
 
 
