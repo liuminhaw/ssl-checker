@@ -4,7 +4,7 @@ Program:
 Author:
     haw
 Version:
-    1.1.0
+    1.2.0
 """
 
 import sys, os, errno
@@ -12,12 +12,21 @@ import logging, datetime
 from pathlib import Path
 
 class PersonalLog():
+    """
+    Params:
+        prog_name - name to show on log files
+        directory - path to save log files (Home directory is set as default path)
+        frequency - how frequent do the files rotate (month[default] or day)
+    """
 
-    def __init__(self, prog_name, directory=''):
+    def __init__(self, prog_name, directory='', frequency='month'):
         self.logger = logging.getLogger(prog_name)
 
         # Log file name
-        filename = '{}-{}.log'.format(datetime.date.today().strftime('%Y-%m'), prog_name)
+        if frequency.lower() == 'day':
+            filename = '{}-{}.log'.format(datetime.date.today().strftime('%Y-%m-%d'), prog_name)
+        else:
+            filename = '{}-{}.log'.format(datetime.date.today().strftime('%Y-%m'), prog_name)
 
         # logging target directory
         if os.path.isdir(directory):
@@ -64,9 +73,10 @@ class PersonalLog():
 
 
 if __name__ == "__main__":
+    # Testing logging_class
     # logging.disable(logging.DEBUG)
 
-    log_test = PersonalLog('logging_class')
+    log_test = PersonalLog('logging_class', frequency='day')
 
     log_test.debug('Debug Test')
     log_test.info('Info Test')

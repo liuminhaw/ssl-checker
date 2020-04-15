@@ -13,7 +13,7 @@ from module_pkg import logging_class as logcl
 
 LOG_DIR = os.path.join(os.getcwd(), 'logs')
 
-logger = logcl.PersonalLog('checker', LOG_DIR)
+logger = logcl.PersonalLog('checker', LOG_DIR, frequency='day')
 
 # matched_sites structure
 # {
@@ -77,6 +77,8 @@ if __name__ == '__main__':
         logger.warning(err)
         sys.exit(11)
 
+    # Start checker information
+    logger.info('\n============ SSL Check ============\n')
 
     # with open(FILENAME) as json_file:
         # sites_data = json.load(json_file)
@@ -122,7 +124,7 @@ if __name__ == '__main__':
             new_mail.construct_content(matches)
             try:
                 new_mail.send_mail()
-                logger.warning('Send mail to {} successed'.format(address))
+                logger.info('Send mail to {} succeeded'.format(address))
             except mailer_sendgrid.mailError as err:
                 logger.warning('Failed to send mail: {}'.format(err))
 
