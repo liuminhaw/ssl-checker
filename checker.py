@@ -4,6 +4,7 @@
 import sys, os
 import datetime, json
 import requests
+import argparse
 
 from checker_pkg import checker_conf
 from checker_pkg import ssl_check
@@ -11,6 +12,7 @@ from checker_pkg import mailer_sendgrid
 from module_pkg import logging_class as logcl
 
 
+VERSION = 'v0.1.1'
 LOG_DIR = os.path.join(os.getcwd(), 'logs')
 
 logger = logcl.PersonalLog('checker', LOG_DIR, frequency='day')
@@ -53,6 +55,11 @@ def check_matching(recipient, days_left, site_data):
 if __name__ == '__main__':
     CONFIG = 'conf.json'
     SITES_CONFIG = 'sites.json'
+
+    # arguments definition
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s {}'.format(VERSION))
+    args = arg_parser.parse_args()
 
     # Check for config file existence
     if not os.path.isfile(CONFIG):
