@@ -27,32 +27,38 @@ function checkCode() {
 # Usage: Installation DESTDIR 
 # ===========================
 function Installation() {
-    DESTDIR=${1}
+  DESTDIR=${1}
 
-    # Setup process
-    cp README.md ${DESTDIR}
-    checkCode 11 "Copy README.md failed." &> /dev/null    
-    cp requirements.txt ${DESTDIR}
-    checkCode 11 "Copy requirements.txt failed." &> /dev/null    
+  # Setup process
+  cp README.md ${DESTDIR}
+  checkCode 11 "Copy README.md failed." &> /dev/null    
+  cp requirements.txt ${DESTDIR}
+  checkCode 11 "Copy requirements.txt failed." &> /dev/null    
 
-    if [[ ! -f ${DESTDIR}/sites.json ]]; then
-        cp sites.json ${DESTDIR}
-        checkCode 11 "Copy sites.json failed." &> /dev/null    
-    fi
+  if [[ ! -f ${DESTDIR}/sites.json ]]; then
+    cp sites.template ${DESTDIR}/sites.json
+    checkCode 11 "Copy sites.json failed." &> /dev/null    
+  else
+    cp sites.template ${DESTDIR}/sites.template
+    checkCode 11 "Copy sites.template failed." &> /dev/null    
+  fi
 
-    if [[ ! -f ${DESTDIR}/conf.json ]]; then
-        cp conf.json ${DESTDIR}
-        checkCode 11 "Copy conf.json failed." &> /dev/null    
-    fi
+  if [[ ! -f ${DESTDIR}/conf.json ]]; then
+    cp conf.template ${DESTDIR}/conf.json
+    checkCode 11 "Copy conf.json failed." &> /dev/null    
+  else
+    cp conf.template ${DESTDIR}/conf.template}
+    checkCode 11 "Copy conf.template failed." &> /dev/null    
+  fi
 
-    cp -r checker_pkg ${DESTDIR}
-    checkCode 11 "Copy checker_pkg directory failed." &> /dev/null    
-    cp -r module_pkg ${DESTDIR}
-    checkCode 11 "Copy module_pkg directory failed." &> /dev/null    
-    cp checker.py ${DESTDIR}
-    checkCode 11 "Copy checker.py failed." &> /dev/null    
-    chmod 755 ${DESTDIR}/checker.py
-    checkCode 13 "Change checker.py file permission failed." &> /dev/null    
+  cp -r checker_pkg ${DESTDIR}
+  checkCode 11 "Copy checker_pkg directory failed." &> /dev/null    
+  cp -r module_pkg ${DESTDIR}
+  checkCode 11 "Copy module_pkg directory failed." &> /dev/null    
+  cp checker.py ${DESTDIR}
+  checkCode 11 "Copy checker.py failed." &> /dev/null    
+  chmod 755 ${DESTDIR}/checker.py
+  checkCode 13 "Change checker.py file permission failed." &> /dev/null    
 }
 
 
@@ -60,13 +66,13 @@ function Installation() {
 USAGE="setup.sh DESTINATION"
 
 if [[ "${#}" -ne 1 ]];  then
-    echo -e "USAGE:\n    ${USAGE}"
-    exit 1
+  echo -e "USAGE:\n    ${USAGE}"
+  exit 1
 fi
 
 if [[ ! -d ${1} ]]; then
-    echo "ERROR: Destination directory does not exist"
-    exit 3
+  echo "ERROR: Destination directory does not exist"
+  exit 3
 fi
 
 

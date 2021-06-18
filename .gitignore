@@ -130,3 +130,7 @@ dmypy.json
 
 # visual code
 .vscode
+
+# config files
+conf.json
+sites.json
