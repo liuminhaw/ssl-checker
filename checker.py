@@ -1,21 +1,22 @@
 # -*- encoding: utf-8 -*-
 
 
+# Standard library imports
 import sys, os
 import datetime, json
 import requests
 import argparse
 
+# Local application imports
+import env
 from checker_pkg import checker_conf
 from checker_pkg import ssl_check
-from checker_pkg import mailer_sendgrid
+from checker_pkg import mailer
 from module_pkg import logging_class as logcl
 
 
-VERSION = 'v0.1.1'
-LOG_DIR = os.path.join(os.getcwd(), 'logs')
 
-logger = logcl.PersonalLog('checker', LOG_DIR, frequency='day')
+logger = logcl.PersonalLog('checker', env.LOG_DIR, frequency='day')
 
 # matched_sites structure
 # {
@@ -53,31 +54,29 @@ def check_matching(recipient, days_left, site_data):
 
 
 if __name__ == '__main__':
-    CONFIG = 'conf.json'
-    SITES_CONFIG = 'sites.json'
 
     # arguments definition
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s {}'.format(VERSION))
+    arg_parser.add_argument('-V', '--version', action='version', version='%(prog)s {}'.format(env.VERSION))
     args = arg_parser.parse_args()
 
     # Check for config file existence
-    if not os.path.isfile(CONFIG):
-        print('[INFO] {} file not exist.'.format(CONFIG))
+    if not os.path.isfile(env.CONFIG):
+        print('[INFO] {} file not exist.'.format(env.CONFIG))
         sys.exit(1)
-    if not os.path.isfile(SITES_CONFIG):
-        print('[INFO] {} file not exists.'.format(SITES_CONFIG))
+    if not os.path.isfile(env.SITES_CONFIG):
+        print('[INFO] {} file not exists.'.format(env.SITES_CONFIG))
         sys.exit(1)
 
     # Test global config - conf.json
     try:
-        mail_info = checker_conf.Config(CONFIG)
+        mail_info = checker_conf.SendingConfig(env.CONFIG)
     except checker_conf.configError as err:
         logger.warning(err)
         sys.exit(11)
 
     # Test config - sites.json
-    sites_info = checker_conf.SitesConfig(SITES_CONFIG)
+    sites_info = checker_conf.SitesConfig(env.SITES_CONFIG)
     try:
         sites_info.validation()
     except checker_conf.configError as err:
@@ -122,17 +121,27 @@ if __name__ == '__main__':
     # Sending mail
     if bool(matched_sites):
         for address, matches in matched_sites.items():
-            new_mail = mailer_sendgrid.Sender(
-                mail_info.api_key, 
-                mail_info.sender, 
-                address, 
-                mail_info.subject)
+            if mail_info.method.lower() == 'sendgrid':
+                new_mail = mailer.SendgridSender(
+                    mail_info.api_key, 
+                    mail_info.sender, 
+                    address, 
+                    mail_info.subject)
+            elif mail_info.method.lower() == 'ses':
+                new_mail = mailer.SesSender(
+                    mail_info.key_id,
+                    mail_info.secret_key,
+                    mail_info.region,
+                    mail_info.sender,
+                    address,
+                    mail_info.subject
+                )
 
             new_mail.construct_content(matches)
             try:
                 new_mail.send_mail()
                 logger.info('Send mail to {} succeeded'.format(address))
-            except mailer_sendgrid.mailError as err:
+            except mailer.mailError as err:
                 logger.warning('Failed to send mail: {}'.format(err))
 
 

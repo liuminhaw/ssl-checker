@@ -5,5 +5,13 @@
         "sender": "General sender",
         "recipient": "General recipient",
         "subject": "Mail subject"
+    },
+    "ses": {
+        "key": "iam aws_access_key_id",
+        "secret": "iam aws_secret_access_key",
+        "region": "service region_name",
+        "sender": "General sender",
+        "recipient": "General recipient",
+        "subject": "Mail subject"
     }
 }
