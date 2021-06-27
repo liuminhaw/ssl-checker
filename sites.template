@@ -1,11 +1,12 @@
 {
     "site-name": {
-        "site-url": "website url",
+        "site-domain": "website domain",
         "alert-days": ["30", "7", "3"],
-        "recipient": "recipient only for this url (optional)"
+        "host-ip": "direct check for ssl cert on host (optional)",
+        "recipient": "recipient only for this domain (optional)"
     },
     "site-name-2": {
-        "site-url": "website url",
+        "site-domain": "website domain",
         "alert-days": ["15", "7", "1"]
     }
 }

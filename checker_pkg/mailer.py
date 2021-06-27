@@ -24,7 +24,7 @@ class Sender():
         """
         Params:
             alert_data - dict of VALUE sites that will expire in KEY days
-            # {'days': ['site_url1', 'site_url2'], ...}
+            # {'days': ['site_domain1', 'site_domain2'], ...}
         """
         self.content = '<p>SSL certificates expiration alert</p>'
 
@@ -75,7 +75,7 @@ class SesSender(Sender):
 
         try:
             response = ses_client.send_email(
-                Source=self.sender,``
+                Source=self.sender,
                 Destination={
                     'ToAddresses': [
                         self.recipient

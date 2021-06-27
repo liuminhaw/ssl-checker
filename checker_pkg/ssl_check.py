@@ -31,11 +31,11 @@ def get_alt_names(cert):
         return None
 
 
-def get_certificate(hostname, port):
+def get_certificate(hostname, host, port):
     hostname_idna = idna.encode(hostname)
     sock = socket()
 
-    sock.connect((hostname, port))
+    sock.connect((host, port))
     peername = sock.getpeername()
     ctx = SSL.Context(SSL.TLSv1_2_METHOD) 
     ctx.check_hostname = False
@@ -53,8 +53,8 @@ def get_certificate(hostname, port):
     return HostInfo(cert=crypto_cert, peername=peername, hostname=hostname)
 
 
-def check_it_out(hostname, port):
-    hostinfo = get_certificate(hostname, port)
+def check_it_out(hostname, host, port):
+    hostinfo = get_certificate(hostname, host, port)
     return hostinfo
     # print(type(hostinfo.cert.not_valid_after))
     # print_basic_info(hostinfo)

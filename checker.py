@@ -21,12 +21,12 @@ logger = logcl.PersonalLog('checker', env.LOG_DIR, frequency='day')
 # matched_sites structure
 # {
 #     'recipient1': {
-#         'x-days': ['site-url1', 'site-url2', ...], 
-#         'y-days': ['site-url1', 'site-url2', ...],
+#         'x-days': ['site-domain1', 'site-domain2', ...], 
+#         'y-days': ['site-domain1', 'site-domain2', ...],
 #         ...
 #     },
 #     'recipient2': {
-#         'x-days': ['site-url1', 'site-url2', ...],
+#         'x-days': ['site-domain1', 'site-domain2', ...],
 #         ...
 #     },
 #     ...
@@ -42,7 +42,7 @@ def check_matching(recipient, days_left, site_data):
     """
     # print(site_data)
     config_days = site_data['alert-days']
-    url = site_data['site-url']
+    domain = site_data['site-domain']
 
     for days in config_days:
         if days_left == int(days):
@@ -50,7 +50,7 @@ def check_matching(recipient, days_left, site_data):
                 matched_sites[recipient] = {}
             if days not in matched_sites[recipient]:
                 matched_sites[recipient][days] = []
-            matched_sites[recipient][days].append(url)
+            matched_sites[recipient][days].append(domain)
 
 
 if __name__ == '__main__':
@@ -91,19 +91,26 @@ if __name__ == '__main__':
     for site_name in sites_info.configs:
 
         # Test https
-        url = sites_info.configs[site_name]['site-url']
+        domain = sites_info.configs[site_name]['site-domain']
         try:
-            requests.get('https://{}'.format(url), verify=True)
+            requests.get('https://{}'.format(domain), verify=True)
         except requests.exceptions.SSLError:
-            logger.info('Site {} no https support'.format(url))
+            logger.info('Site {} no https support'.format(domain))
             print('')
             continue
 
+        # Check custom host ip
+        try:
+            connect_host = sites_info.configs[site_name]['host-ip']
+        except KeyError:
+            connect_host = domain 
+
         # Check ssl certificate expiration date
-        host_info = ssl_check.check_it_out(url, 443)
+        host_info = ssl_check.check_it_out(domain, connect_host, 443)
         recent_time = datetime.datetime.now()
         delta_time = host_info.cert.not_valid_after - recent_time
-        info_str = '\nSite URL: {}\n'.format(url)
+        info_str = '\nSite URL: {}\n'.format(domain)
+        info_str += 'Connect host: {}\n'.format(connect_host) 
         info_str += 'Alt name: {}\n'.format(ssl_check.get_alt_names(host_info.cert))
         info_str += 'Issuer: {}\n'.format(ssl_check.get_issuer(host_info.cert))
         info_str += '{} day(s) left\n'.format(delta_time.days)

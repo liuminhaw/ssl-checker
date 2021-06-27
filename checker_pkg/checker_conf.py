@@ -50,8 +50,8 @@ class SendingConfig(Config):
         Config.__init__(self, config_file)
         with open(self.config_file, 'r') as json_file:
             configs = json.load(json_file)
-            err_msg = 'method not set in config file'
-            self.method = self._key_error(configs, 'method', err_msg)
+            err_msg = 'mail-method not set in config file'
+            self.method = self._key_error(configs, 'mail-method', err_msg)
 
         if self.method.lower() == 'sendgrid':
             err_msg = 'sendgrid block not set in config file'
@@ -59,7 +59,7 @@ class SendingConfig(Config):
             self._sendgrid(configs['sendgrid'])
         elif self.method.lower() == 'ses':
             err_msg = 'ses block not set in config file'
-            self._key_error(configs, 'sendgrid', err_msg)
+            self._key_error(configs, 'ses', err_msg)
             self._ses(configs['ses'])
         else:
             raise configError('configError: [{}] block not set in config file'.format(self.method.lower()))
@@ -121,9 +121,9 @@ class SitesConfig(Config):
             configError - configuration error
         """
         for site in self.configs:
-            # Check key: site-url
-            err_msg = 'key [site-url] not set for {}'.format(site)
-            self._key_error(self.configs[site], 'site-url', err_msg)
+            # Check key: site-domain
+            err_msg = 'key [site-domain] not set for {}'.format(site)
+            self._key_error(self.configs[site], 'site-domain', err_msg)
             # Check key: alert-days
             err_msg = 'key [alert-days] not set for {}'.format(site)
             self._key_error(self.configs[site], 'alert-days', err_msg)
